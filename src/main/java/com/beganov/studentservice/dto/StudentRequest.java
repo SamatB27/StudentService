@@ -5,10 +5,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class StudentDto {
-    private String lastName;
+public class StudentRequest {
     private String firstName;
+    private String lastName;
     private String middleName;
-    private String group;
+    private String studentGroup;
     private Double averageGrade;
 }

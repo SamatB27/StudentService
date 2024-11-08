@@ -1,29 +1,31 @@
 package com.beganov.studentservice.mapper;
 
-import com.beganov.studentservice.dto.StudentDto;
+import com.beganov.studentservice.dto.StudentRequest;
+import com.beganov.studentservice.dto.StudentResponse;
 import com.beganov.studentservice.model.Student;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StudentMapper {
 
-    public StudentDto toDto(Student student) {
-        StudentDto dto = new StudentDto();
-        dto.setLastName(student.getLastName());
-        dto.setFirstName(student.getFirstName());
-        dto.setMiddleName(student.getMiddleName());
-        dto.setGroup(student.getStudentGroup());
-        dto.setAverageGrade(student.getAverageGrade());
-        return dto;
+    public StudentResponse toResponse(Student student) {
+        StudentResponse response = new StudentResponse();
+        response.setId(student.getId());
+        response.setLastName(student.getLastName());
+        response.setFirstName(student.getFirstName());
+        response.setMiddleName(student.getMiddleName());
+        response.setStudentGroup(student.getStudentGroup());
+        response.setAverageGrade(student.getAverageGrade());
+        return response;
     }
 
-    public Student toEntity(StudentDto dto) {
+    public Student toEntity(StudentRequest request) {
         Student student = new Student();
-        student.setLastName(dto.getLastName());
-        student.setFirstName(dto.getFirstName());
-        student.setMiddleName(dto.getMiddleName());
-        student.setStudentGroup(dto.getGroup());
-        student.setAverageGrade(dto.getAverageGrade());
+        student.setLastName(request.getLastName());
+        student.setFirstName(request.getFirstName());
+        student.setMiddleName(request.getMiddleName());
+        student.setStudentGroup(request.getStudentGroup());
+        student.setAverageGrade(request.getAverageGrade());
         return student;
     }
 }
