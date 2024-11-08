@@ -1,7 +1,7 @@
 package com.beganov.studentservice.service;
 
-import com.beganov.studentservice.dto.StudentDto;
-import com.beganov.studentservice.exception.EmptyValueException;
+import com.beganov.studentservice.dto.StudentRequest;
+import com.beganov.studentservice.dto.StudentResponse;
 import com.beganov.studentservice.mapper.StudentMapper;
 import com.beganov.studentservice.model.Student;
 import com.beganov.studentservice.repository.StudentRepository;
@@ -25,50 +25,43 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StudentDto> getAllStudents() {
+    public List<StudentResponse> getAllStudents() {
         return studentRepository.findAll()
                 .stream()
-                .map(studentMapper::toDto)
+                .map(studentMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<StudentDto> getStudentById(Long id) {
+    public Optional<StudentResponse> getStudentById(Long id) {
         return studentRepository.findById(id)
-                .map(studentMapper::toDto);
+                .map(studentMapper::toResponse);
     }
 
     @Override
-    public StudentDto saveStudent(StudentDto studentDto) {
-        Student student = studentMapper.toEntity(studentDto);
+    public StudentResponse saveStudent(StudentRequest request) {
+        Student student = studentMapper.toEntity(request);
         Student saved = studentRepository.save(student);
-        return studentMapper.toDto(saved);
+        return studentMapper.toResponse(saved);
     }
 
     @Override
-    public Optional<StudentDto> updateStudent(Long id, StudentDto studentDto) {
-        if (!studentRepository.existsById(id)) {
-            throw new EmptyValueException("Student with id " + id + " does not exist");
-        }
+    public Optional<StudentResponse> updateStudent(Long id, StudentRequest request) {
         return studentRepository.findById(id)
                 .map(existingStudent -> {
-                    existingStudent.setLastName(studentDto.getLastName());
-                    existingStudent.setFirstName(studentDto.getFirstName());
-                    existingStudent.setMiddleName(studentDto.getMiddleName());
-                    existingStudent.setStudentGroup(studentDto.getGroup());
-                    existingStudent.setAverageGrade(studentDto.getAverageGrade());
+                    existingStudent.setLastName(request.getLastName());
+                    existingStudent.setFirstName(request.getFirstName());
+                    existingStudent.setMiddleName(request.getMiddleName());
+                    existingStudent.setStudentGroup(request.getStudentGroup());
+                    existingStudent.setAverageGrade(request.getAverageGrade());
                     Student updatedStudent = studentRepository.save(existingStudent);
-                    return studentMapper.toDto(updatedStudent);
+                    return studentMapper.toResponse(updatedStudent);
                 });
     }
 
     @Override
     public void deleteStudent(Long id) {
-        if (studentRepository.existsById(id)) {
-            studentRepository.deleteById(id);
-        } else {
-            throw new EmptyValueException("Student with id " + id + " does not exist");
-        }
+        studentRepository.deleteById(id);
     }
 }
