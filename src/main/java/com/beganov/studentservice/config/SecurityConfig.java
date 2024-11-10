@@ -18,7 +18,8 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new GithubTokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                                .anyRequest().authenticated()
+                        .requestMatchers("/api/students/oauth2/callback").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults());
         return http.build();
