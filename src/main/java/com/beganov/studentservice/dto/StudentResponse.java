@@ -3,6 +3,8 @@ package com.beganov.studentservice.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 public class StudentResponse {
@@ -11,5 +13,5 @@ public class StudentResponse {
     private String lastName;
     private String middleName;
     private String studentGroup;
-    private Double averageGrade;
+    private BigDecimal averageGrade;
 }
