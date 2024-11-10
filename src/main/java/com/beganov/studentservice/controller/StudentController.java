@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/students")
@@ -21,43 +20,53 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StudentResponse>> getAllStudents() {
-        List<StudentResponse> list = studentService.getAllStudents();
-        return list.isEmpty() ? ResponseEntity.status(HttpStatus.NOT_FOUND).build() : ResponseEntity.ok(list);
+    public ResponseEntity<String> hello() {
+        return ResponseEntity.ok("Вошел в систему");
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllStudents() {
+        ResponseEntity<List<StudentResponse>> responseList = studentService.getAllStudents();
+        if (responseList.getStatusCode() == HttpStatus.NOT_FOUND) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("В базе не существует ни одного студента");
+        } else {
+            return studentService.getAllStudents();
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getStudentById(@PathVariable Long id) {
-        Optional<StudentResponse> response = studentService.getStudentById(id);
-        return response
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Студент с ID " + id + " не найден"));
+        ResponseEntity<StudentResponse> studentResponse = studentService.getStudentById(id);
+        if (studentResponse.getStatusCode() == HttpStatus.NOT_FOUND) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Студент с ID " + id + " не существует");
+        } else {
+            return studentResponse;
+        }
     }
 
     @PutMapping
     public ResponseEntity<StudentResponse> saveStudent(@RequestBody StudentRequest request) {
-        StudentResponse createdStudent = studentService.saveStudent(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
+        return studentService.saveStudent(request);
     }
 
     @PostMapping("/{id}")
     public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody StudentRequest request) {
-        Optional<StudentResponse> updatedStudent = studentService.updateStudent(id, request);
-        if (updatedStudent.isPresent()) {
-            return ResponseEntity.ok(updatedStudent.get());
-        } else {
+        ResponseEntity<StudentResponse> updatedStudentResponse = studentService.updateStudent(id, request);
+        if (updatedStudentResponse.getStatusCode() == HttpStatus.NOT_FOUND) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Студент с ID " + id + " не существует");
+        } else {
+            return updatedStudentResponse;
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
-        if (studentService.getStudentById(id).isEmpty()) {
+        ResponseEntity<Void> response = studentService.deleteStudent(id);
+        if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Студент с ID " + id + " не существует");
         } else {
             studentService.deleteStudent(id);
-            return ResponseEntity.status(HttpStatus.OK).body("Студен с ID " + id + " удален" );
+            return ResponseEntity.status(HttpStatus.OK).body("Студен с ID " + id + " удален");
         }
     }
 }
