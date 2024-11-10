@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/students")
@@ -22,6 +24,14 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<String> hello() {
         return ResponseEntity.ok("Вошел в систему");
+    }
+
+    @GetMapping("/oauth2/callback")
+    public Map<String, String> handleGoogleCallback(@RequestParam("code") String code) {
+        System.out.println("Authorization code received: " + code);
+        Map<String, String> response = new HashMap<>();
+        response.put("authorization_code", code);
+        return response;
     }
 
     @GetMapping("/all")
