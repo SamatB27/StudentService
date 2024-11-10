@@ -2,14 +2,18 @@ package com.beganov.studentservice.service;
 
 import com.beganov.studentservice.dto.StudentRequest;
 import com.beganov.studentservice.dto.StudentResponse;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface StudentService {
-    List<StudentResponse> getAllStudents();
-    Optional<StudentResponse> getStudentById(Long id);
-    StudentResponse saveStudent(StudentRequest request);
-    Optional <StudentResponse> updateStudent(Long id, StudentRequest request);
-    void deleteStudent(Long id);
+    ResponseEntity<List<StudentResponse>> getAllStudents();
+
+    ResponseEntity<StudentResponse> getStudentById(Long id);
+
+    ResponseEntity<StudentResponse> saveStudent(StudentRequest request);
+
+    ResponseEntity<StudentResponse> updateStudent(Long id, StudentRequest request);
+
+    ResponseEntity<Void> deleteStudent(Long id);
 }

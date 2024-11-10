@@ -5,12 +5,13 @@ import com.beganov.studentservice.dto.StudentResponse;
 import com.beganov.studentservice.mapper.StudentMapper;
 import com.beganov.studentservice.model.Student;
 import com.beganov.studentservice.repository.StudentRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -25,43 +26,59 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StudentResponse> getAllStudents() {
-        return studentRepository.findAll()
+    public ResponseEntity<List<StudentResponse>> getAllStudents() {
+        List<StudentResponse> responseList = studentRepository.findAll()
                 .stream()
                 .map(studentMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
+        if (responseList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(responseList);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<StudentResponse> getStudentById(Long id) {
-        return studentRepository.findById(id)
-                .map(studentMapper::toResponse);
+    public ResponseEntity<StudentResponse> getStudentById(Long id) {
+        Optional<Student> student = studentRepository.findById(id);
+        return student
+                .map(value -> ResponseEntity.ok(studentMapper.toResponse(value)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null));
     }
 
     @Override
-    public StudentResponse saveStudent(StudentRequest request) {
+    public ResponseEntity<StudentResponse> saveStudent(StudentRequest request) {
         Student student = studentMapper.toEntity(request);
         Student saved = studentRepository.save(student);
-        return studentMapper.toResponse(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(studentMapper.toResponse(saved));
     }
 
     @Override
-    public Optional<StudentResponse> updateStudent(Long id, StudentRequest request) {
-        return studentRepository.findById(id)
-                .map(existingStudent -> {
-                    existingStudent.setLastName(request.getLastName());
-                    existingStudent.setFirstName(request.getFirstName());
-                    existingStudent.setMiddleName(request.getMiddleName());
-                    existingStudent.setStudentGroup(request.getStudentGroup());
-                    existingStudent.setAverageGrade(request.getAverageGrade());
-                    Student updatedStudent = studentRepository.save(existingStudent);
-                    return studentMapper.toResponse(updatedStudent);
-                });
+    public ResponseEntity<StudentResponse> updateStudent(Long id, StudentRequest request) {
+        Optional<Student> existingStudent = studentRepository.findById(id);
+        if (existingStudent.isPresent()) {
+            existingStudent.get().setLastName(request.getLastName());
+            existingStudent.get().setFirstName(request.getFirstName());
+            existingStudent.get().setMiddleName(request.getMiddleName());
+            existingStudent.get().setStudentGroup(request.getStudentGroup());
+            existingStudent.get().setAverageGrade(request.getAverageGrade());
+            Student updatedStudent = studentRepository.save(existingStudent.get());
+            return ResponseEntity.ok(studentMapper.toResponse(updatedStudent));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @Override
-    public void deleteStudent(Long id) {
-        studentRepository.deleteById(id);
+    public ResponseEntity<Void> deleteStudent(Long id) {
+        if (studentRepository.existsById(id)) {
+            studentRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
     }
 }
